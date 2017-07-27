@@ -1,13 +1,14 @@
 %bcond_with tests
 
 Name:           docker-compose
-Version:        1.14.0
+Version:        1.15.0
 Release:        1%{?dist}
 Summary:        Multi-container orchestration for Docker
 License:        ASL 2.0
 URL:            https://github.com/docker/compose
 Source0:        https://files.pythonhosted.org/packages/source/d/docker-compose/docker-compose-%{version}.tar.gz
-Patch0:         remove-colorama-requirement.patch
+# https://github.com/docker/compose/pull/5055
+Patch0:         conditional-colorama.patch
 Patch1:         remove-environment-markers.patch
 Patch2:         relax-requirements.patch
 BuildArch:      noarch
@@ -77,6 +78,9 @@ Using Compose is basically a three-step process.
 
 %install
 %py2_install
+install -D -p -m 644 contrib/completion/bash/docker-compose      %{buildroot}%{_datadir}/bash-completion/completions/docker-compose
+install -D -p -m 644 contrib/completion/fish/docker-compose.fish %{buildroot}%{_datadir}/fish/vendor_completions.d/docker-compose.fish
+install -D -p -m 644 contrib/completion/zsh/_docker-compose      %{buildroot}%{_datadir}/zsh/site-functions/_docker-compose
 
 
 %if %{with tests}
@@ -90,8 +94,16 @@ Using Compose is basically a three-step process.
 %doc CHANGELOG.md README.rst
 %{_bindir}/docker-compose
 %{python2_sitelib}/*
+%{_datadir}/bash-completion
+%{_datadir}/fish
+%{_datadir}/zsh
 
 
 %changelog
+* Thu Jul 27 2017 Carl George <carl@george.computer> - 1.15.0-1
+- Latest upstream
+- Replace patch0 with https://github.com/docker/compose/pull/5055
+- Add bash, fish, and zsh completions
+
 * Wed Jul 26 2017 Carl George <carl@george.computer> - 1.14.0-1
 - Initial package
